@@ -3,6 +3,7 @@ package node
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"strings"
 
@@ -38,18 +39,27 @@ func (n *WorkerNode) Start() {
 	for {
 		// receive command from master node
 		res, err := stream.Recv()
-		if err != nil {
+		if err != nil || res.Data == "" {
 			return
 		}
 
-		// log command
-		fmt.Println("received command: ", res.Data)
+		strCommand := res.Data
+		fmt.Println("strCommand: ", strCommand)
 
 		// execute command
-		parts := strings.Split(res.Data, " ")
-		if err := exec.Command(parts[0], parts[1:]...).Run(); err != nil {
-			fmt.Println(err)
+		cmd := exec.Command("/bin/bash", "-c", strCommand)
+		stdout, _ := cmd.StdoutPipe()
+		if err := cmd.Start(); err != nil {
+			fmt.Println("Execute failed when Start:" + err.Error())
+			return
 		}
+		out_bytes, _ := ioutil.ReadAll(stdout)
+		stdout.Close()
+		if err := cmd.Wait(); err != nil {
+			fmt.Println("Execute failed when Wait:" + err.Error())
+			return
+		}
+		fmt.Println(strings.TrimSpace(string(out_bytes)))
 	}
 }
 
