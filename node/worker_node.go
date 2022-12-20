@@ -6,6 +6,11 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"strings"
+	"time"
+
+	redis_driver "worker_tools/driver"
+
+	"github.com/gomodule/redigo/redis"
 
 	"google.golang.org/grpc"
 )
@@ -16,6 +21,15 @@ type WorkerNode struct {
 }
 
 func (n *WorkerNode) Init() (err error) {
+	//redis
+	err = redis_driver.NewDriver(&redis_driver.Conf{
+		Host: "127.0.0.1",
+		Port: 6379,
+	}, redis.DialConnectTimeout(time.Second*10))
+	if err != nil {
+		return
+	}
+
 	// connect to master node
 	n.conn, err = grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
@@ -25,6 +39,8 @@ func (n *WorkerNode) Init() (err error) {
 	// grpc client
 	n.c = NewNodeServiceClient(n.conn)
 
+	//register worker
+	registerWorker()
 	return nil
 }
 
@@ -61,6 +77,18 @@ func (n *WorkerNode) Start() {
 		}
 		fmt.Println(strings.TrimSpace(string(out_bytes)))
 	}
+}
+
+func registerWorker() (err error) {
+	rd := redis_driver.GetRedisInstance()
+	//设置超时时间
+	rd.SetTimeout(20 * time.Second)
+	//注册worker
+	worker_node_key, err := rd.RegisterWorkereNode("worker_node")
+	fmt.Println("worker_node_key", worker_node_key)
+	//注册心跳
+	rd.SetHeartBeat(worker_node_key)
+	return
 }
 
 var workerNode *WorkerNode

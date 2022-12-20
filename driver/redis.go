@@ -3,6 +3,7 @@ package redis
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -10,6 +11,8 @@ import (
 )
 
 const WORDER_PREFIX_KEY = "worker-node:"
+
+var once sync.Once
 
 type Conf struct {
 	Addr     string
@@ -76,11 +79,15 @@ func NewDriver(conf *Conf, options ...redis.DialOption) error {
 			return c, nil
 		},
 	}
+	fmt.Println("redis已经连接")
 
-	RedisClient = &RedisDriver{
-		conf:        conf,
-		redisClient: rd,
-	}
+	once.Do(func() {
+		RedisClient = &RedisDriver{
+			conf:        conf,
+			redisClient: rd,
+		}
+	})
+
 	return nil
 }
 
