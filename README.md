@@ -20,3 +20,8 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"cmd": "cat ./hello.txt"}' \
   http://localhost:3001/tasks
+
+2.3、task_queue相关
+
+task_queue相关
+https://github.com/xiangzaixiansheng/task_queue
