@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	config_util "worker_tools/config"
 	redis_driver "worker_tools/driver"
 	"worker_tools/utils"
 
@@ -35,10 +36,9 @@ func (w *WorkerControl) CommitJob(job *utils.Job) {
 }
 
 func (n *WorkerNode) Init() (err error) {
-	//redis
 	err = redis_driver.NewDriver(&redis_driver.Conf{
-		Host: "127.0.0.1",
-		Port: 6379,
+		Host: config_util.Config.Redis.Host,
+		Port: config_util.Config.Redis.Port,
 	}, redis.DialConnectTimeout(time.Second*10))
 	if err != nil {
 		return
