@@ -118,14 +118,17 @@ func registerWorker() (err error) {
 }
 
 func registerTaskQueue() (err error) {
+	//注册一个队列
 	jobQueue := utils.NewJobQueue(10)
 	fmt.Println("init job queue success")
 
 	m := utils.NewWorkerManager(jobQueue)
 
-	//注册两个worker
-	m.CreateWorker(1)
-	m.CreateWorker(2)
+	//启动的worker数
+	execCnt := config_util.Config.Worker.ExecCnt
+	for index := 0; index < execCnt; index++ {
+		m.CreateWorker(index)
+	}
 
 	workerControl = &WorkerControl{
 		jobQueue: jobQueue,

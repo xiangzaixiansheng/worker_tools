@@ -10,7 +10,8 @@ import (
 )
 
 type Configuration struct {
-	Redis RedisConfig `yaml:"redis-config"`
+	Redis  RedisConfig  `yaml:"redis-config"`
+	Worker WorkerConfig `yaml:"worker-config"`
 }
 
 type RedisConfig struct {
@@ -19,6 +20,10 @@ type RedisConfig struct {
 	Db       int    `yaml:"db"`
 	Password string `yaml:"password"`
 	RDBPath  string `yaml:"rdb_path"`
+}
+
+type WorkerConfig struct {
+	ExecCnt int `yaml:"execCnt"`
 }
 
 var Config Configuration

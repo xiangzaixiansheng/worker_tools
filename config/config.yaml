@@ -4,3 +4,6 @@ redis-config:
   db: 0
   password:
   rdb_path: ./dump.rdb
+
+worker-config:
+  execCnt: 3 # 消耗队列的线程数
