@@ -75,6 +75,10 @@ func (q *JobQueue) PopJob() *Job {
 	return q.queue.Remove(q.queue.Front()).(*Job)
 }
 
+func (q *JobQueue) GetLength() int {
+	return q.size
+}
+
 func (q *JobQueue) RemoveLeastJob() {
 	if q.queue.Len() != 0 {
 		back := q.queue.Back()

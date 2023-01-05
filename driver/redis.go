@@ -97,7 +97,7 @@ func (rd *RedisDriver) SetTimeout(timeout time.Duration) {
 
 //开启心跳
 func (rd *RedisDriver) SetHeartBeat(worker_node_key string) {
-	go rd.heartBear(worker_node_key)
+	go rd.heartBeat(worker_node_key)
 }
 
 func (rd *RedisDriver) do(command string, params ...interface{}) (interface{}, error) {
@@ -106,7 +106,7 @@ func (rd *RedisDriver) do(command string, params ...interface{}) (interface{}, e
 	return conn.Do(command, params...)
 }
 
-func (rd *RedisDriver) heartBear(worker_node_key string) {
+func (rd *RedisDriver) heartBeat(worker_node_key string) {
 
 	key := worker_node_key
 	tickers := time.NewTicker(rd.timeout / 2)
