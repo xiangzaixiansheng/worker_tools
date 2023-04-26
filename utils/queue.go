@@ -42,11 +42,12 @@ type JobQueue struct {
 	capacity int
 }
 
+// cap 队列的长度, 和任务通道通知的大小
 func NewJobQueue(cap int) *JobQueue {
 	return &JobQueue{
 		capacity:   cap,
 		queue:      list.New(),
-		noticeChan: make(chan struct{}, 1),
+		noticeChan: make(chan struct{}, cap),
 	}
 }
 
@@ -111,11 +112,11 @@ func (m *WorkerManager) CreateWorker(workerName int) error {
 		for {
 			select {
 			case <-m.jobQueue.waitJob():
-				fmt.Println("get a job from job queue No.", index)
+				fmt.Printf("get a job from job queue No. %v worker===> \n", index)
 				job = m.jobQueue.PopJob()
-				fmt.Println("start to execute job No.", index)
+				fmt.Printf("start to execute job No. %v worker===> \n", index)
 				job.Execute()
-				fmt.Print("job done")
+				fmt.Printf("execute job No. %v worker ===> done  jobqueue len (%v) \n \n \n", index, m.jobQueue.GetLength())
 				job.Done()
 			}
 		}

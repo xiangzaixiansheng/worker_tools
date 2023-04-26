@@ -81,6 +81,8 @@ func (n *WorkerNode) Start() {
 		job := &utils.Job{
 			DoneChan: make(chan struct{}, 1),
 			HandleFunc: func(job *utils.Job) error {
+				// 阻塞一下 模拟任务处理
+				time.Sleep(5 * time.Second)
 				// execute command
 				cmd := exec.Command("/bin/bash", "-c", strCommand)
 				stdout, _ := cmd.StdoutPipe()
@@ -100,8 +102,9 @@ func (n *WorkerNode) Start() {
 		}
 
 		workerControl.CommitJob(job)
-		fmt.Println("commit job to job queue success")
-		job.WaitDone()
+		fmt.Println("commit job to job queue succes")
+		//等待任务执行完成的 异步处理则不需要下面的方法
+		//job.WaitDone()
 	}
 }
 
@@ -118,8 +121,9 @@ func registerWorker() (err error) {
 }
 
 func registerTaskQueue() (err error) {
-	//注册一个队列
-	jobQueue := utils.NewJobQueue(10)
+	//注册一个队列, 长度默认是50个
+	jobQueue := utils.NewJobQueue(50)
+
 	fmt.Println("init job queue success")
 
 	m := utils.NewWorkerManager(jobQueue)
