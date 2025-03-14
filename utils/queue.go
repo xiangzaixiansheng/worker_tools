@@ -68,12 +68,32 @@ func (q *JobQueue) PopJob() *Job {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	if q.size == 0 {
+	if q.size == 0 || q.queue.Len() == 0 {
+		return nil
+	}
+
+	front := q.queue.Front()
+	if front == nil {
+		return nil
+	}
+
+	value := front.Value
+	if value == nil {
+		q.size--
+		q.queue.Remove(front)
+		return nil
+	}
+
+	job, ok := value.(*Job)
+	if !ok {
+		q.size--
+		q.queue.Remove(front)
 		return nil
 	}
 
 	q.size--
-	return q.queue.Remove(q.queue.Front()).(*Job)
+	q.queue.Remove(front)
+	return job
 }
 
 func (q *JobQueue) GetLength() int {
@@ -83,9 +103,23 @@ func (q *JobQueue) GetLength() int {
 func (q *JobQueue) RemoveLeastJob() {
 	if q.queue.Len() != 0 {
 		back := q.queue.Back()
-		abandonJob := back.Value.(*Job)
-		abandonJob.Done()
-		q.queue.Remove(back)
+		if back == nil {
+			return
+		}
+		
+		value := back.Value
+		if value == nil {
+			q.queue.Remove(back)
+			return
+		}
+
+		if job, ok := value.(*Job); ok {
+			job.Done()
+			q.queue.Remove(back)
+		} else {
+			// 如果类型断言失败，仍然需要移除该元素以保持队列的一致性
+			q.queue.Remove(back)
+		}
 	}
 }
 
